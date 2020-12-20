@@ -4,9 +4,6 @@ A simple `react` + `styled-components` popup
 
 ## Package Interface
 
-Popup, usePopupContext } from './Popup';
-export { PopupPosition } from './helper';
-export { PopupContentContainer, PopupContainer
 Named exports: `Popup`, `usePopupContext`, ``PopupPosition`, `PopupContainer`, and `PopupContentContainer`  
 Default export: `Popup`
 
