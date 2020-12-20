@@ -4,7 +4,7 @@ A simple `react` + `styled-components` popup
 
 ## Package Interface
 
-Named exports: `Popup`, `usePopupContext`, ``PopupPosition`, `PopupContainer`, and `PopupContentContainer`  
+Named exports: `Popup`, `usePopupContext`, `PopupPosition`, `PopupContainer`, and `PopupContentContainer`  
 Default export: `Popup`
 
 ## Usages
