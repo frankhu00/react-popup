@@ -1,0 +1,58 @@
+{
+    "name": "@frankhu00/react-popup",
+    "version": "1.0.0",
+    "description": "React popup",
+    "main": "dist/umd/index.js",
+    "module": "dist/esm/index.js",
+    "source": "src/index.js",
+    "files": [
+        "dist/",
+        "src/"
+    ],
+    "scripts": {
+        "build": "npm run build-js-esm && npm run build-js-umd",
+        "build-js-esm": "cross-env BABEL_ENV=production-esm babel src -d dist/esm --ignore \"**/*.spec.js,**/*.spec.jsx\"",
+        "build-js-umd": "cross-env BABEL_ENV=production-umd babel src -d dist/umd --ignore \"**/*.spec.js,**/*.spec.jsx\"",
+        "dev": "cross-env NODE_ENV=development webpack serve"
+    },
+    "keywords": [
+        "React",
+        "popup",
+        "tooltip"
+    ],
+    "author": "Frank Hu",
+    "license": "ISC",
+    "peerDependencies": {
+        "react": ">=17",
+        "styled-components": "^5.2"
+    },
+    "devDependencies": {
+        "@babel/cli": "^7.12.10",
+        "@babel/core": "^7.12.10",
+        "@babel/plugin-syntax-object-rest-spread": "^7.8.3",
+        "@babel/preset-env": "^7.12.11",
+        "@babel/preset-react": "^7.12.10",
+        "@commitlint/cli": "^11.0.0",
+        "@commitlint/config-conventional": "^11.0.0",
+        "babel-loader": "^8.2.2",
+        "cross-env": "^7.0.3",
+        "git-cz": "^4.7.1",
+        "html-webpack-plugin": "^4.5.0",
+        "prettier": "^2.2.1",
+        "react": "^17.0.1",
+        "react-dom": "^17.0.1",
+        "styled-components": "^5.2.1",
+        "webpack": "^5.11.0",
+        "webpack-cli": "^4.2.0",
+        "webpack-dev-server": "^3.11.0"
+    },
+    "config": {
+        "commitizen": {
+            "path": "./node_modules/git-cz"
+        }
+    },
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/frankhu00/react-popup.git"
+    }
+}
