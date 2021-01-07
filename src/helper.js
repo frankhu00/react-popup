@@ -1,5 +1,3 @@
-import { useState, useEffect } from 'react';
-
 const PopupPosition = {
     TOP: { top: 1, bottom: 0, left: 0, right: 0 },
     TOP_RIGHT: { top: 1, bottom: 0, left: 0, right: 1 },
@@ -16,7 +14,7 @@ const computePopupOrientation = (
     parentSize,
     { x: bufferX = 10, y: bufferY = 10, preferredOrientation = PopupPosition.BOTTOM } = {}
 ) => {
-    const orientation = { ...preferredOrientation };
+    let orientation = { ...preferredOrientation };
     const winWidth = window.innerWidth;
     const winHeight = window.innerHeight;
     const popupX = size.width;
