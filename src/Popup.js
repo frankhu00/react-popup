@@ -68,9 +68,12 @@ export const Popup = ({
                     setPositionStyle(popupPositionStyle);
                 }
             } else {
-                console.warn(
-                    `Could not determine popup container size. Failed to auto-adjust popup to render in view port`
-                );
+                if (!containerSize) {
+                    console.warn(
+                        `Could not determine popup container size. Failed to auto-adjust popup to render in view port`
+                    );
+                    console.warn('Popup.js containerSize', containerSize);
+                }
                 setPositionStyle(handleOrientationResults(position));
             }
         } else {
