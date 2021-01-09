@@ -1,12 +1,31 @@
 const PopupPosition = {
     TOP: { top: 1, bottom: 0, left: 0, right: 0 },
+    TOP_CENTER: { top: 1, xCenter: 1 },
     TOP_RIGHT: { top: 1, bottom: 0, left: 0, right: 1 },
     TOP_LEFT: { top: 1, bottom: 0, left: 1, right: 0 },
     BOTTOM: { top: 0, bottom: 1, left: 0, right: 0 },
+    BOTTOM_CENTER: { bottom: 1, xCenter: 1 },
     BOTTOM_LEFT: { top: 0, bottom: 1, left: 1, right: 0 },
     BOTTOM_RIGHT: { top: 0, bottom: 1, left: 0, right: 1 },
     LEFT: { top: 0, bottom: 0, left: 1, right: 0 },
+    LEFT_CENTER: { top: 0, bottom: 0, left: 1, right: 0, yCenter: 1 },
     RIGHT: { top: 0, bottom: 0, left: 0, right: 1 },
+    RIGHT_CENTER: { top: 0, bottom: 0, left: 0, right: 1, yCenter: 1 },
+};
+
+//TODO : Not sure how this will play with initial position setting with center on
+//Since at initial state, the popupSize may be undefined
+const computeCenterPosition = (popupSize, parentSize) => {
+    const computation = (popupSize, parentSize) => (name) => {
+        const popupDimension = popupSize[name];
+        const parentDimension = parentSize[name];
+        const popupMid = popupDimension / 2;
+        const parentMid = parentDimension / 2;
+        const percentage = (parentMid - popupMid) / parentDimension;
+        return percentage;
+    };
+    const getCenter = computation(popupSize, parentSize);
+    return { x: getCenter('width'), y: getCenter('height') };
 };
 
 const computePopupOrientation = (
@@ -28,6 +47,11 @@ const computePopupOrientation = (
     };
 
     const { top, bottom, left, right } = orientation;
+
+    //TODO : Make sure bounds work for the right side of the screen...
+    //It may not work as it will just make the parent div into a scrollable...
+    //Also need to make sure how center will play with bound contrains
+
     //Test if preferredOrientation input is in viewport first
     if (top) {
         if (popupY > availableSpace.top) {
@@ -57,6 +81,16 @@ const computePopupOrientation = (
         }
     }
 
+    if (preferredOrientation.xCenter || preferredOrientation.yCenter) {
+        const { x: xCenter, y: yCenter } = computeCenterPosition(size, parentSize);
+        if (preferredOrientation.xCenter) {
+            orientation.left = xCenter;
+        }
+        if (preferredOrientation.yCenter) {
+            orientation.bottom = yCenter;
+        }
+    }
+
     //Return preferred orientation if all constrains failed (no place to put the popup on top, bottom, left, and right)
     if (
         popupX > availableSpace.right &&
@@ -75,20 +109,31 @@ const handleOrientationResults = (orientation, { marginX = 5, marginY = 5 } = {}
     const hasVertical = top || bottom;
     const hasHorizontal = left || right;
 
+    const printOrientationCSSValue = (value) => {
+        if (typeof value === 'string') {
+            return value;
+        } else if (typeof value === 'number') {
+            return value * 100 + '%';
+        }
+    };
+
     const result = {};
 
     if (hasVertical) {
         if (top) {
-            result.bottom = '100%'; //pushes it to the top of parent
+            result.bottom = printOrientationCSSValue(top); //pushes it to the top of parent
+        } else if (bottom) {
+            //note the else IF
+            result.top = printOrientationCSSValue(bottom);
         }
         result.margin = `${marginY}px 0px`;
     }
 
     if (hasHorizontal) {
         if (left) {
-            result.right = '100%'; //pushes it to the left of parent
+            result.right = printOrientationCSSValue(left); //pushes it to the left of parent
         } else {
-            result.left = '100%';
+            result.left = printOrientationCSSValue(right);
         }
 
         //If only horizontal and no vertical, then need to set top: 0px;

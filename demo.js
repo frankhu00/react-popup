@@ -85,6 +85,16 @@ const Demo = () => (
                 )}
             </Popup>
         </div>
+        <div style={{ width: '100%', display: 'flex', justifyContent: 'center' }}>
+            <div>
+                <Popup
+                    content={<PopupContent>Custom position</PopupContent>}
+                    position={PopupPosition.BOTTOM_CENTER}
+                >
+                    {({ showPopup }) => <button onClick={showPopup}>Custom position</button>}
+                </Popup>
+            </div>
+        </div>
     </div>
 );
 

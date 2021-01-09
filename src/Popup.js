@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef, useContext, createContext } from 'react';
+import { useDelayedUnmount } from '@frankhu00/react-animations';
 import { PopupContainer, PopupContentContainer } from './styled';
 import {
     computePopupOrientation,
@@ -27,12 +28,13 @@ export const Popup = ({
     marginY = 5,
     bufferX = 25, //buffer when trying to calculate if popup will fit in the specified position
     bufferY = 25,
+    animationDuration = 500,
     ...props
 }) => {
     const node = useRef();
     const popupNode = useRef();
     const [containerSize, setContainerSize] = useState(null);
-    const [show, setShow] = useState(showOnRender);
+    const [show, setShow, stage] = useDelayedUnmount(animationDuration, showOnRender);
     const [positionStyle, setPositionStyle] = useState(
         handleOrientationResults(position, { marginX, marginY })
     );
@@ -145,6 +147,8 @@ export const Popup = ({
                     show={show}
                     zIndex={zIndex}
                     style={{ ...popupStyle, ...positionStyle }}
+                    stage={stage}
+                    animationDuration={animationDuration}
                 >
                     {typeof prioritizePopupContent() === 'function'
                         ? prioritizePopupContent()({ ...propsToPassDown, ...props })

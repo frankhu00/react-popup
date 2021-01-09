@@ -1,4 +1,5 @@
-import styled from 'styled-components';
+import styled, { css } from 'styled-components';
+import { fade, DelayUnmountStage } from '@frankhu00/react-animations';
 
 export const PopupContainer = styled.div`
     position: relative;
@@ -12,4 +13,12 @@ export const PopupContentContainer = styled.div`
     background: #fff;
     z-index: ${({ zIndex = 3 }) => zIndex};
     ${({ show }) => (show === false ? `display: none;` : null)}
+    ${({ stage, animationDuration }) =>
+        stage === DelayUnmountStage.ENTERING
+            ? css`
+                  animation: ${fade.in()} ${animationDuration / 1000}s forwards;
+              `
+            : css`
+                  animation: ${fade.out()} ${animationDuration / 1000}s forwards;
+              `}
 `;
