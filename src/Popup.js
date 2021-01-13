@@ -24,8 +24,6 @@ export const Popup = ({
     zIndex = 3,
     persist = false,
     forcePosition = false, //turns off checking for in view port rendering
-    marginX = 5, //see handleOrientationResults
-    marginY = 5,
     bufferX = 25, //buffer when trying to calculate if popup will fit in the specified position
     bufferY = 25,
     animationDuration = 500,
@@ -35,9 +33,7 @@ export const Popup = ({
     const popupNode = useRef();
     const [containerSize, setContainerSize] = useState(null);
     const [show, setShow, stage] = useDelayedUnmount(animationDuration, showOnRender);
-    const [positionStyle, setPositionStyle] = useState(
-        handleOrientationResults(position, { marginX, marginY })
-    );
+    const [positionStyle, setPositionStyle] = useState(handleOrientationResults(position));
     const [dynamicContent, setDynamicContent] = useState(null);
 
     useEffect(() => {
@@ -63,10 +59,7 @@ export const Popup = ({
 
                 //only update position if it needed to be changed to fit in the view
                 if (JSON.stringify(position) !== JSON.stringify(orientation)) {
-                    const popupPositionStyle = handleOrientationResults(orientation, {
-                        marginX,
-                        marginY,
-                    });
+                    const popupPositionStyle = handleOrientationResults(orientation);
                     setPositionStyle(popupPositionStyle);
                 }
             } else {

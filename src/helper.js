@@ -3,7 +3,7 @@ const PopupPosition = {
     TOP_CENTER: { top: 1, xCenter: 1 },
     TOP_RIGHT: { top: 1, bottom: 0, left: 0, right: 1 },
     TOP_LEFT: { top: 1, bottom: 0, left: 1, right: 0 },
-    BOTTOM: { top: 0, bottom: 1, left: 0, right: 0 },
+    BOTTOM: { top: 0, bottom: 0, left: 0, right: 0 },
     BOTTOM_CENTER: { bottom: 1, xCenter: 1 },
     BOTTOM_LEFT: { top: 0, bottom: 1, left: 1, right: 0 },
     BOTTOM_RIGHT: { top: 0, bottom: 1, left: 0, right: 1 },
@@ -48,9 +48,7 @@ const computePopupOrientation = (
 
     const { top, bottom, left, right } = orientation;
 
-    //TODO : Make sure bounds work for the right side of the screen...
-    //It may not work as it will just make the parent div into a scrollable...
-    //Also need to make sure how center will play with bound contrains
+    //TODO : Need to make sure how center will play with bound contrains
 
     //Test if preferredOrientation input is in viewport first
     if (top) {
@@ -104,21 +102,20 @@ const computePopupOrientation = (
     return orientation;
 };
 
-const handleOrientationResults = (orientation, { marginX = 5, marginY = 5 } = {}) => {
+const printOrientationCSSValue = (value) => {
+    if (typeof value === 'string') {
+        return value;
+    } else if (typeof value === 'number') {
+        return value * 100 + '%';
+    }
+};
+
+const handleOrientationResults = (orientation) => {
     const { top, bottom, left, right } = orientation;
     const hasVertical = top || bottom;
     const hasHorizontal = left || right;
 
-    const printOrientationCSSValue = (value) => {
-        if (typeof value === 'string') {
-            return value;
-        } else if (typeof value === 'number') {
-            return value * 100 + '%';
-        }
-    };
-
     const result = {};
-
     if (hasVertical) {
         if (top) {
             result.bottom = printOrientationCSSValue(top); //pushes it to the top of parent
@@ -126,7 +123,6 @@ const handleOrientationResults = (orientation, { marginX = 5, marginY = 5 } = {}
             //note the else IF
             result.top = printOrientationCSSValue(bottom);
         }
-        result.margin = `${marginY}px 0px`;
     }
 
     if (hasHorizontal) {
@@ -139,9 +135,6 @@ const handleOrientationResults = (orientation, { marginX = 5, marginY = 5 } = {}
         //If only horizontal and no vertical, then need to set top: 0px;
         if (!hasVertical) {
             result.top = '0px';
-            result.margin = `0px ${marginX}px`;
-        } else {
-            result.margin = `${marginY}px ${marginX}px`;
         }
     }
 
