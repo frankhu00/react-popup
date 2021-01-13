@@ -78,6 +78,18 @@ const Demo = () => (
             >
                 {({ showPopup }) => <Button onClick={showPopup}>Position top-center</Button>}
             </Popup>
+            <Popup
+                content={<PopupContent>Position left-center</PopupContent>}
+                position={PopupPosition.LEFT_CENTER}
+            >
+                {({ showPopup }) => <Button onClick={showPopup}>Position left-center</Button>}
+            </Popup>
+            <Popup
+                content={<PopupContent>Position right-center</PopupContent>}
+                position={PopupPosition.RIGHT_CENTER}
+            >
+                {({ showPopup }) => <Button onClick={showPopup}>Position right-center</Button>}
+            </Popup>
         </Grid>
         <h2>Custom position</h2>
         <div style={{ width: '100%', display: 'flex', justifyContent: 'center' }}>
