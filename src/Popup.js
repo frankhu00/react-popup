@@ -6,6 +6,8 @@ import {
     handleOrientationResults,
     PopupPosition,
     extractDOMRect,
+    PopupType,
+    emptyDOMRect,
 } from './helper';
 
 const PopupContext = createContext();
@@ -18,6 +20,7 @@ export const Popup = ({
     showOnRender = false,
     closeOnOffClick = true,
     position = PopupPosition.BOTTOM,
+    popupType = PopupType.ABSOLUTE,
     popupStyle,
     CustomPopupContainer = PopupContainer,
     CustomPopupContentContainer = PopupContentContainer,
@@ -31,20 +34,22 @@ export const Popup = ({
 }) => {
     const node = useRef();
     const popupNode = useRef();
-    const [containerSize, setContainerSize] = useState(null);
     const [show, setShow, stage] = useDelayedUnmount(animationDuration, showOnRender);
-    const [positionStyle, setPositionStyle] = useState(handleOrientationResults(position));
+    const [positionStyle, setPositionStyle] = useState(
+        handleOrientationResults(position, popupType, {
+            containerSize: emptyDOMRect,
+            popupSize: emptyDOMRect,
+        })
+    );
     const [dynamicContent, setDynamicContent] = useState(null);
-
-    useEffect(() => {
-        if (node && node.current && typeof node.current.getBoundingClientRect === 'function') {
-            setContainerSize(extractDOMRect(node.current.getBoundingClientRect()));
-        }
-    }, [node.current]);
 
     useEffect(() => {
         if (show) {
             const popupSize = extractDOMRect(popupNode.current.getBoundingClientRect());
+            const containerSize =
+                node && node.current && typeof node.current.getBoundingClientRect === 'function'
+                    ? extractDOMRect(node.current.getBoundingClientRect())
+                    : null;
             document.addEventListener('mousedown', handleClickOutside);
             if (typeof onPopupShow === 'function') {
                 onPopupShow();
@@ -57,19 +62,21 @@ export const Popup = ({
                     preferredOrientation: position,
                 });
 
-                //only update position if it needed to be changed to fit in the view
-                if (JSON.stringify(position) !== JSON.stringify(orientation)) {
-                    const popupPositionStyle = handleOrientationResults(orientation);
-                    setPositionStyle(popupPositionStyle);
-                }
+                const popupPositionStyle = handleOrientationResults(orientation, popupType, {
+                    containerSize,
+                    popupSize,
+                });
+                setPositionStyle(popupPositionStyle);
             } else {
                 if (!containerSize) {
                     console.warn(
                         `Could not determine popup container size. Failed to auto-adjust popup to render in view port`
                     );
-                    console.warn('Popup.js containerSize', containerSize);
+                    console.warn('Popup.js containerSize', emptyDOMRect);
                 }
-                setPositionStyle(handleOrientationResults(position));
+                setPositionStyle(
+                    handleOrientationResults(position, popupType, { containerSize, popupSize })
+                );
             }
         } else {
             if (typeof onPopupClose === 'function') {
@@ -142,6 +149,7 @@ export const Popup = ({
                     style={{ ...popupStyle, ...positionStyle }}
                     stage={stage}
                     animationDuration={animationDuration}
+                    popupType={popupType}
                 >
                     {typeof prioritizePopupContent() === 'function'
                         ? prioritizePopupContent()({ ...propsToPassDown, ...props })

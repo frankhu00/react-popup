@@ -3,7 +3,7 @@ const PopupPosition = {
     TOP_CENTER: { top: 1, xCenter: 1 },
     TOP_RIGHT: { top: 1, bottom: 0, left: 0, right: 1 },
     TOP_LEFT: { top: 1, bottom: 0, left: 1, right: 0 },
-    BOTTOM: { top: 0, bottom: 0, left: 0, right: 0 },
+    BOTTOM: { top: 0, bottom: 1, left: 0, right: 0 },
     BOTTOM_CENTER: { bottom: 1, xCenter: 1 },
     BOTTOM_LEFT: { top: 0, bottom: 1, left: 1, right: 0 },
     BOTTOM_RIGHT: { top: 0, bottom: 1, left: 0, right: 1 },
@@ -11,6 +11,11 @@ const PopupPosition = {
     LEFT_CENTER: { top: 0, bottom: 0, left: 1, right: 0, yCenter: 1 },
     RIGHT: { top: 0, bottom: 0, left: 0, right: 1 },
     RIGHT_CENTER: { top: 0, bottom: 0, left: 0, right: 1, yCenter: 1 },
+};
+
+const PopupType = {
+    ABSOLUTE: 'absolute',
+    FIXED: 'fixed',
 };
 
 //TODO : Not sure how this will play with initial position setting with center on
@@ -23,6 +28,22 @@ const computeCenterPosition = (popupSize, parentSize) => {
         const parentMid = parentDimension / 2;
         const percentage = (parentMid - popupMid) / parentDimension;
         return percentage;
+    };
+    const getCenter = computation(popupSize, parentSize);
+    return { x: getCenter('width'), y: getCenter('height') };
+};
+
+const computeFixedCenterPosition = (popupSize, parentSize) => {
+    const computation = (popupSize, parentSize) => (name) => {
+        const coor = name == 'width' ? 'left' : 'top';
+        const popupDimension = popupSize[name];
+        const popupMid = popupDimension / 2;
+
+        const parentDimension = parentSize[name];
+        const parentCoord = parentSize[coor];
+        const parentMid = parentDimension / 2;
+
+        return parentMid + parentCoord - popupMid;
     };
     const getCenter = computation(popupSize, parentSize);
     return { x: getCenter('width'), y: getCenter('height') };
@@ -110,35 +131,82 @@ const printOrientationCSSValue = (value) => {
     }
 };
 
-const handleOrientationResults = (orientation) => {
+const handleOrientationResults = (
+    orientation,
+    popupType = PopupType.ABSOLUTE,
+    { containerSize, popupSize } = {}
+) => {
     const { top, bottom, left, right } = orientation;
     const hasVertical = top || bottom;
     const hasHorizontal = left || right;
 
     const result = {};
-    if (hasVertical) {
-        if (top) {
-            result.bottom = printOrientationCSSValue(top); //pushes it to the top of parent
-        } else if (bottom) {
-            //note the else IF
-            result.top = printOrientationCSSValue(bottom);
-        }
-    }
 
-    if (hasHorizontal) {
-        if (left) {
-            result.right = printOrientationCSSValue(left); //pushes it to the left of parent
-        } else {
-            result.left = printOrientationCSSValue(right);
+    if (popupType === PopupType.FIXED) {
+        const { top: cTop, width: cWidth, height: cHeight, left: cLeft } = containerSize;
+        const { width: pWidth, height: pHeight } = popupSize;
+
+        if (hasVertical) {
+            if (bottom) {
+                result.top = printOrientationCSSValue(`${cTop + cHeight}px`);
+            } else {
+                result.top = printOrientationCSSValue(`${cTop - pHeight}px`);
+            }
         }
 
-        //If only horizontal and no vertical, then need to set top: 0px;
-        if (!hasVertical) {
-            result.top = '0px';
+        if (hasHorizontal) {
+            if (left) {
+                result.left = printOrientationCSSValue(`${cLeft - pWidth}px`);
+            } else {
+                result.left = printOrientationCSSValue(`${cLeft + cWidth}px`);
+            }
+        }
+
+        if (orientation.xCenter || orientation.yCenter) {
+            const { x: xCenter, y: yCenter } = computeFixedCenterPosition(popupSize, containerSize);
+            if (orientation.xCenter) {
+                result.left = printOrientationCSSValue(`${xCenter}px`);
+            }
+            if (orientation.yCenter) {
+                result.top = printOrientationCSSValue(`${yCenter}px`);
+            }
+        }
+    } else {
+        if (hasVertical) {
+            if (top) {
+                result.bottom = printOrientationCSSValue(top); //pushes it to the top of parent
+            } else if (bottom) {
+                //note the else IF
+                result.top = printOrientationCSSValue(bottom);
+            }
+        }
+
+        if (hasHorizontal) {
+            if (left) {
+                result.right = printOrientationCSSValue(left); //pushes it to the left of parent
+            } else {
+                result.left = printOrientationCSSValue(right);
+            }
+
+            //If only horizontal and no vertical, then need to set top: 0px;
+            if (!hasVertical) {
+                result.top = '0px';
+            }
         }
     }
 
     return result;
+};
+
+const emptyDOMRect = {
+    bottom: 0,
+    height: 0,
+    left: 0,
+    right: 0,
+    top: 0,
+    width: 0,
+    x: 0,
+    y: 0,
 };
 
 const extractDOMRect = (domRect) => ({
@@ -152,4 +220,11 @@ const extractDOMRect = (domRect) => ({
     y: domRect.y,
 });
 
-export { computePopupOrientation, handleOrientationResults, PopupPosition, extractDOMRect };
+export {
+    computePopupOrientation,
+    handleOrientationResults,
+    PopupPosition,
+    PopupType,
+    extractDOMRect,
+    emptyDOMRect,
+};

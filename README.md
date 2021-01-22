@@ -65,7 +65,7 @@ The `PopupPosition` has the following options:
 Pass in the option to the `position` prop. The position of the popup are by default adjusted to fit in view, when popups are determined to be going out of view
 with the specified position, the component will auto-adjust the position of the popup so that it stays in view. To turn this feature off, do `forcePosition={true}`.
 
-## Custom Popup Positions
+## Custom Popup Positions (WIP)
 
 You can specify custom position by passing in an object of the form
 
@@ -85,23 +85,25 @@ If the properties are numbers (denoted N), it will be translated to `N*100 + "%"
 
 ## Popup Props
 
-| Prop                        | Type          | Default               | Description                                                                                 |
-| --------------------------- | ------------- | --------------------- | ------------------------------------------------------------------------------------------- |
-| content                     | Component     | undefined             | A component or function that returns a component to serve as the popup content              |
-| onPopupShow                 | func          | undefined             | Function to trigger when the popup is shown                                                 |
-| onPopupClose                | func          | undefined             | Function to trigger when the popup is closed                                                |
-| showOnRender                | boolean       | false                 | If true, popup will display when mounted                                                    |
-| closeOnOffClick             | boolean       | true                  | If true, clicking off the popup will close the popup                                        |
-| persist                     | boolean       | false                 | If true, the popup will be mounted in DOM and hidden / shown via CSS                        |
-| position                    | PopupPosition | PopupPosition.BOTTOM  | Defines the position of the popup                                                           |
-| popupStyle                  | object        | undefined             | Styles for popup                                                                            |
-| zIndex                      | number        | 3                     | Z-index for popup                                                                           |
-| forcePosition               | boolean       | false                 | If true, turns off checking for in view port rendering                                      |
-| animationDuration           | number        | 500                   | Animation duration in ms                                                                    |
-| bufferX                     | number        | 25                    | The amount of pixel added as buffer when calculating the x-direction in view port constrain |
-| bufferY                     | number        | 25                    | The amount of pixel added as buffer when calculating the y-direction in view port constrain |
-| CustomPopupContainer        | Component     | PopupContainer        | Defines the component that warps around the entire popup-able component                     |
-| CustomPopupContentContainer | Component     | PopupContentContainer | Defines the popup component                                                                 |
+| Prop                        | Type          | Default               | Description                                                                                                                                   |
+| --------------------------- | ------------- | --------------------- | --------------------------------------------------------------------------------------------------------------------------------------------- |
+| --------------------------- | ------------- | --------------------- | -------------------------------------------------------------------------------------------                                                   |
+| content                     | Component     | undefined             | A component or function that returns a component to serve as the popup content                                                                |
+| onPopupShow                 | func          | undefined             | Function to trigger when the popup is shown                                                                                                   |
+| onPopupClose                | func          | undefined             | Function to trigger when the popup is closed                                                                                                  |
+| showOnRender                | boolean       | false                 | If true, popup will display when mounted                                                                                                      |
+| closeOnOffClick             | boolean       | true                  | If true, clicking off the popup will close the popup                                                                                          |
+| persist                     | boolean       | false                 | If true, the popup will be mounted in DOM and hidden / shown via CSS                                                                          |
+| position                    | PopupPosition | PopupPosition.BOTTOM  | Defines the position of the popup                                                                                                             |
+| popupType                   | PopupType     | PopupType.ABSOLUTE    | Uses `position: absolute;`. Use `PopupType.FIXED` for `position: fixed`. This is useful when the popup needs to be fixed for styling purposes |
+| popupStyle                  | object        | undefined             | Styles for popup                                                                                                                              |
+| zIndex                      | number        | 3                     | Z-index for popup                                                                                                                             |
+| forcePosition               | boolean       | false                 | If true, turns off checking for in view port rendering                                                                                        |
+| animationDuration           | number        | 500                   | Animation duration in ms                                                                                                                      |
+| bufferX                     | number        | 25                    | The amount of pixel added as buffer when calculating the x-direction in view port constrain                                                   |
+| bufferY                     | number        | 25                    | The amount of pixel added as buffer when calculating the y-direction in view port constrain                                                   |
+| CustomPopupContainer        | Component     | PopupContainer        | Defines the component that warps around the entire popup-able component                                                                       |
+| CustomPopupContentContainer | Component     | PopupContentContainer | Defines the popup component                                                                                                                   |
 
 ## Popup Methods
 
