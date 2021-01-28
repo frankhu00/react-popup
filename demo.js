@@ -20,6 +20,16 @@ const Button = styled.button`
     width: 100%;
 `;
 
+const ButtoWithPopup = React.forwardRef((props, ref) => (
+    <Button ref={ref} onClick={props.showPopup}>
+        {props.children}
+    </Button>
+));
+
+const customPosFn = (offset) => ({ containerSize }) => {
+    return containerSize.top + offset + 'px';
+};
+
 const Demo = () => (
     <div>
         <h1>Popup Demo</h1>
@@ -91,14 +101,21 @@ const Demo = () => (
                 {({ showPopup }) => <Button onClick={showPopup}>Position right-center</Button>}
             </Popup>
         </Grid>
-        <h2>Custom position</h2>
+        <h2>Custom Position</h2>
         <div style={{ width: '100%', display: 'flex', justifyContent: 'center' }}>
             <div>
                 <Popup
-                    content={<PopupContent>Custom position</PopupContent>}
-                    position={{ top: 0.2, right: 0.2 }}
+                    content={<PopupContent>Custom position 1</PopupContent>}
+                    position={PopupPosition.CUSTOM({ top: 10, left: 10 })}
                 >
-                    {({ showPopup }) => <button onClick={showPopup}>Custom position</button>}
+                    <ButtoWithPopup>Top: 10px, Left: 10px</ButtoWithPopup>
+                </Popup>
+                <Popup
+                    content={<PopupContent>Custom position 2</PopupContent>}
+                    position={PopupPosition.CUSTOM({ top: customPosFn(200) })}
+                    popupStyle={{ background: 'rgba(0,0,0,0.3)', color: '#fff' }}
+                >
+                    <ButtoWithPopup>Top = 200 + parent top</ButtoWithPopup>
                 </Popup>
             </div>
         </div>

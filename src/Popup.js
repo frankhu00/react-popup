@@ -1,12 +1,11 @@
 import React, { useState, useEffect, useRef, useContext, createContext } from 'react';
 import { useDelayedUnmount } from '@frankhu00/react-animations';
-import { PopupContainer, PopupContentContainer } from './styled';
+import { PopupContentContainer } from './styled';
 import {
     computePopupOrientation,
     handleOrientationResults,
     PopupPosition,
     extractDOMRect,
-    PopupType,
     emptyDOMRect,
 } from './helper';
 
@@ -20,9 +19,7 @@ export const Popup = ({
     showOnRender = false,
     closeOnOffClick = true,
     position = PopupPosition.BOTTOM,
-    popupType = PopupType.ABSOLUTE,
     popupStyle,
-    CustomPopupContainer = PopupContainer,
     CustomPopupContentContainer = PopupContentContainer,
     zIndex = 3,
     persist = false,
@@ -36,7 +33,7 @@ export const Popup = ({
     const popupNode = useRef();
     const [show, setShow, stage] = useDelayedUnmount(animationDuration, showOnRender);
     const [positionStyle, setPositionStyle] = useState(
-        handleOrientationResults(position, popupType, {
+        handleOrientationResults(position, {
             containerSize: emptyDOMRect,
             popupSize: emptyDOMRect,
         })
@@ -49,7 +46,7 @@ export const Popup = ({
             const containerSize =
                 node && node.current && typeof node.current.getBoundingClientRect === 'function'
                     ? extractDOMRect(node.current.getBoundingClientRect())
-                    : null;
+                    : emptyDOMRect;
             document.addEventListener('mousedown', handleClickOutside);
             if (typeof onPopupShow === 'function') {
                 onPopupShow();
@@ -62,7 +59,7 @@ export const Popup = ({
                     preferredOrientation: position,
                 });
 
-                const popupPositionStyle = handleOrientationResults(orientation, popupType, {
+                const popupPositionStyle = handleOrientationResults(orientation, {
                     containerSize,
                     popupSize,
                 });
@@ -74,9 +71,7 @@ export const Popup = ({
                     );
                     console.warn('Popup.js containerSize', emptyDOMRect);
                 }
-                setPositionStyle(
-                    handleOrientationResults(position, popupType, { containerSize, popupSize })
-                );
+                setPositionStyle(handleOrientationResults(position, { containerSize, popupSize }));
             }
         } else {
             if (typeof onPopupClose === 'function') {
@@ -96,18 +91,13 @@ export const Popup = ({
     }, [showOnRender]);
 
     const handleClickOutside = (e) => {
-        if (closeOnOffClick && !node.current.contains(e.target)) {
+        if (popupNode.current) {
+            if (closeOnOffClick && !popupNode.current.contains(e.target)) {
+                setShow(false);
+            }
+        } else {
             setShow(false);
         }
-    };
-
-    const [CustomComponent, setCustomComponent] = useState({
-        Container: CustomPopupContainer,
-        Content: CustomPopupContentContainer,
-    });
-
-    const updateCustomComponents = (comps) => {
-        setCustomComponent((prev) => ({ ...prev, ...comps }));
     };
 
     const setPopupState = (state) => {
@@ -131,31 +121,41 @@ export const Popup = ({
         closePopup,
         togglePopup,
         setDynamicContent,
-        updateCustomComponents,
     };
 
     return (
-        <CustomComponent.Container ref={node} {...props}>
+        <>
             <PopupContext.Provider value={propsToPassDown}>
                 {typeof children === 'function'
-                    ? children({ ...propsToPassDown, ...props })
-                    : children}
+                    ? React.cloneElement(
+                          children({
+                              ...propsToPassDown,
+                              ...props,
+                          }),
+                          {
+                              ref: (ele) => (node.current = ele),
+                          }
+                      )
+                    : React.cloneElement(children, {
+                          ...propsToPassDown,
+                          ...props,
+                          ref: (ele) => (node.current = ele),
+                      })}
             </PopupContext.Provider>
             {show || persist ? (
-                <CustomComponent.Content
+                <CustomPopupContentContainer
                     ref={popupNode}
                     show={show}
                     zIndex={zIndex}
                     style={{ ...popupStyle, ...positionStyle }}
                     stage={stage}
                     animationDuration={animationDuration}
-                    popupType={popupType}
                 >
                     {typeof prioritizePopupContent() === 'function'
                         ? prioritizePopupContent()({ ...propsToPassDown, ...props })
                         : prioritizePopupContent()}
-                </CustomComponent.Content>
+                </CustomPopupContentContainer>
             ) : null}
-        </CustomComponent.Container>
+        </>
     );
 };

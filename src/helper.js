@@ -1,21 +1,18 @@
-const PopupPosition = {
-    TOP: { top: 1, bottom: 0, left: 0, right: 0 },
-    TOP_CENTER: { top: 1, xCenter: 1 },
-    TOP_RIGHT: { top: 1, bottom: 0, left: 0, right: 1 },
-    TOP_LEFT: { top: 1, bottom: 0, left: 1, right: 0 },
-    BOTTOM: { top: 0, bottom: 1, left: 0, right: 0 },
-    BOTTOM_CENTER: { bottom: 1, xCenter: 1 },
-    BOTTOM_LEFT: { top: 0, bottom: 1, left: 1, right: 0 },
-    BOTTOM_RIGHT: { top: 0, bottom: 1, left: 0, right: 1 },
-    LEFT: { top: 0, bottom: 0, left: 1, right: 0 },
-    LEFT_CENTER: { top: 0, bottom: 0, left: 1, right: 0, yCenter: 1 },
-    RIGHT: { top: 0, bottom: 0, left: 0, right: 1 },
-    RIGHT_CENTER: { top: 0, bottom: 0, left: 0, right: 1, yCenter: 1 },
-};
-
-const PopupType = {
-    ABSOLUTE: 'absolute',
-    FIXED: 'fixed',
+const _PopupPosition = {
+    TOP: { name: 'TOP', top: 1, bottom: 0, left: 0, right: 0 },
+    TOP_CENTER: { name: 'TOP_CENTER', top: 1, xCenter: 1 },
+    TOP_RIGHT: { name: 'TOP_RIGHT', top: 1, bottom: 0, left: 0, right: 1 },
+    TOP_LEFT: { name: 'TOP_LEFT', top: 1, bottom: 0, left: 1, right: 0 },
+    BOTTOM: { name: 'BOTTOM', top: 0, bottom: 1, left: 0, right: 0 },
+    BOTTOM_CENTER: { name: 'BOTTOM_CENTER', bottom: 1, xCenter: 1 },
+    BOTTOM_LEFT: { name: 'BOTTOM_LEFT', top: 0, bottom: 1, left: 1, right: 0 },
+    BOTTOM_RIGHT: { name: 'BOTTOM_RIGHT', top: 0, bottom: 1, left: 0, right: 1 },
+    LEFT: { name: 'LEFT', top: 0, bottom: 0, left: 1, right: 0 },
+    LEFT_CENTER: { name: 'LEFT_CENTER', top: 0, bottom: 0, left: 1, right: 0, yCenter: 1 },
+    RIGHT: { name: 'RIGHT', top: 0, bottom: 0, left: 0, right: 1 },
+    RIGHT_CENTER: { name: 'RIGHT_CENTER', top: 0, bottom: 0, left: 0, right: 1, yCenter: 1 },
+    CUSTOM: ({ top, left, bottom, right }) => ({ name: 'CUSTOM', top, left, bottom, right }),
+    CUSTOM_POSITION: { name: 'CUSTOM' },
 };
 
 //TODO : Not sure how this will play with initial position setting with center on
@@ -52,8 +49,13 @@ const computeFixedCenterPosition = (popupSize, parentSize) => {
 const computePopupOrientation = (
     size,
     parentSize,
-    { x: bufferX = 10, y: bufferY = 10, preferredOrientation = PopupPosition.BOTTOM } = {}
+    { x: bufferX = 10, y: bufferY = 10, preferredOrientation = _PopupPosition.BOTTOM } = {}
 ) => {
+    // Custom positions do not have in-view bound restriction
+    if (preferredOrientation.name === _PopupPosition.CUSTOM_POSITION.name) {
+        return preferredOrientation;
+    }
+
     let orientation = { ...preferredOrientation };
     const winWidth = window.innerWidth;
     const winHeight = window.innerHeight;
@@ -71,11 +73,15 @@ const computePopupOrientation = (
 
     //TODO : Need to make sure how center will play with bound contrains
 
+    let nameArr = [];
     //Test if preferredOrientation input is in viewport first
     if (top) {
         if (popupY > availableSpace.top) {
             orientation.top = 0;
             orientation.bottom = 1;
+            nameArr.push('BOTTOM');
+        } else {
+            nameArr.push('TOP');
         }
     }
 
@@ -83,6 +89,9 @@ const computePopupOrientation = (
         if (popupY > availableSpace.bottom) {
             orientation.top = 1;
             orientation.bottom = 0;
+            nameArr.push('TOP');
+        } else {
+            nameArr.push('BOTTOM');
         }
     }
 
@@ -90,6 +99,9 @@ const computePopupOrientation = (
         if (popupX > availableSpace.left) {
             orientation.left = 0;
             orientation.right = 1;
+            nameArr.push('RIGHT');
+        } else {
+            nameArr.push('LEFT');
         }
     }
 
@@ -97,6 +109,9 @@ const computePopupOrientation = (
         if (popupX > availableSpace.right) {
             orientation.left = 1;
             orientation.right = 0;
+            nameArr.push('LEFT');
+        } else {
+            nameArr.push('RIGHT');
         }
     }
 
@@ -108,6 +123,7 @@ const computePopupOrientation = (
         if (preferredOrientation.yCenter) {
             orientation.bottom = yCenter;
         }
+        nameArr.push('CENTER');
     }
 
     //Return preferred orientation if all constrains failed (no place to put the popup on top, bottom, left, and right)
@@ -118,81 +134,94 @@ const computePopupOrientation = (
         popupY > availableSpace.top
     ) {
         orientation = preferredOrientation;
+    } else {
+        //Update the orientation name
+        //uhh not sure if this method is reliable though lol
+        orientation.name = nameArr.join('_');
     }
-
     return orientation;
 };
 
-const printOrientationCSSValue = (value) => {
+const printOrientationCSSValue = (value, { containerSize, popupSize } = {}) => {
     if (typeof value === 'string') {
         return value;
     } else if (typeof value === 'number') {
-        return value * 100 + '%';
+        return value + 'px';
+    } else if (typeof value === 'function') {
+        return value({ containerSize, popupSize });
+    } else {
+        return null;
     }
 };
 
-const handleOrientationResults = (
-    orientation,
-    popupType = PopupType.ABSOLUTE,
-    { containerSize, popupSize } = {}
-) => {
-    const { top, bottom, left, right } = orientation;
-    const hasVertical = top || bottom;
-    const hasHorizontal = left || right;
-
+const handleOrientationResults = (orientation, { containerSize, popupSize } = {}) => {
+    const { name, top, bottom, left, right } = orientation;
+    const { x: xCenter, y: yCenter } = computeFixedCenterPosition(popupSize, containerSize);
     const result = {};
 
-    if (popupType === PopupType.FIXED) {
-        const { top: cTop, width: cWidth, height: cHeight, left: cLeft } = containerSize;
-        const { width: pWidth, height: pHeight } = popupSize;
+    const { top: cTop, width: cWidth, height: cHeight, left: cLeft } = containerSize;
+    const { width: pWidth, height: pHeight } = popupSize;
 
-        if (hasVertical) {
-            if (bottom) {
-                result.top = printOrientationCSSValue(`${cTop + cHeight}px`);
-            } else {
-                result.top = printOrientationCSSValue(`${cTop - pHeight}px`);
-            }
-        }
-
-        if (hasHorizontal) {
-            if (left) {
-                result.left = printOrientationCSSValue(`${cLeft - pWidth}px`);
-            } else {
-                result.left = printOrientationCSSValue(`${cLeft + cWidth}px`);
-            }
-        }
-
-        if (orientation.xCenter || orientation.yCenter) {
-            const { x: xCenter, y: yCenter } = computeFixedCenterPosition(popupSize, containerSize);
-            if (orientation.xCenter) {
-                result.left = printOrientationCSSValue(`${xCenter}px`);
-            }
-            if (orientation.yCenter) {
-                result.top = printOrientationCSSValue(`${yCenter}px`);
-            }
-        }
-    } else {
-        if (hasVertical) {
-            if (top) {
-                result.bottom = printOrientationCSSValue(top); //pushes it to the top of parent
-            } else if (bottom) {
-                //note the else IF
-                result.top = printOrientationCSSValue(bottom);
-            }
-        }
-
-        if (hasHorizontal) {
-            if (left) {
-                result.right = printOrientationCSSValue(left); //pushes it to the left of parent
-            } else {
-                result.left = printOrientationCSSValue(right);
-            }
-
-            //If only horizontal and no vertical, then need to set top: 0px;
-            if (!hasVertical) {
-                result.top = '0px';
-            }
-        }
+    switch (name) {
+        case _PopupPosition.BOTTOM.name:
+            result.top = printOrientationCSSValue(`${cTop + cHeight}px`);
+            result.left = printOrientationCSSValue(`${cLeft}px`);
+            break;
+        case _PopupPosition.BOTTOM_RIGHT.name:
+            result.top = printOrientationCSSValue(`${cTop + cHeight}px`);
+            result.left = printOrientationCSSValue(`${cLeft + cWidth}px`);
+            break;
+        case _PopupPosition.BOTTOM_LEFT.name:
+            result.top = printOrientationCSSValue(`${cTop + cHeight}px`);
+            result.left = printOrientationCSSValue(`${cLeft - pWidth}px`);
+            break;
+        case _PopupPosition.BOTTOM_CENTER.name:
+            result.top = printOrientationCSSValue(`${cTop + cHeight}px`);
+            result.left = printOrientationCSSValue(`${xCenter}px`);
+            break;
+        case _PopupPosition.TOP_LEFT.name:
+            result.top = printOrientationCSSValue(`${cTop - pHeight}px`);
+            result.left = printOrientationCSSValue(`${cLeft - pWidth}px`);
+            break;
+        case _PopupPosition.TOP_RIGHT.name:
+            result.top = printOrientationCSSValue(`${cTop - pHeight}px`);
+            result.left = printOrientationCSSValue(`${cLeft + cWidth}px`);
+            break;
+        case _PopupPosition.TOP_CENTER.name:
+            result.top = printOrientationCSSValue(`${cTop - pHeight}px`);
+            result.left = printOrientationCSSValue(`${xCenter}px`);
+            break;
+        case _PopupPosition.TOP.name:
+            result.top = printOrientationCSSValue(`${cTop - pHeight}px`);
+            result.left = printOrientationCSSValue(`${cLeft}px`);
+            break;
+        case _PopupPosition.LEFT.name:
+            result.top = printOrientationCSSValue(`${cTop}px`);
+            result.left = printOrientationCSSValue(`${cLeft - pWidth}px`);
+            break;
+        case _PopupPosition.LEFT_CENTER.name:
+            result.top = printOrientationCSSValue(`${yCenter}px`);
+            result.left = printOrientationCSSValue(`${cLeft - pWidth}px`);
+            break;
+        case _PopupPosition.RIGHT.name:
+            result.top = printOrientationCSSValue(`${cTop}px`);
+            result.left = printOrientationCSSValue(`${cLeft + cWidth}px`);
+            break;
+        case _PopupPosition.RIGHT_CENTER.name:
+            result.top = printOrientationCSSValue(`${yCenter}px`);
+            result.left = printOrientationCSSValue(`${cLeft + cWidth}px`);
+            break;
+        case _PopupPosition.CUSTOM_POSITION.name:
+            result.top = printOrientationCSSValue(top, { containerSize, popupSize });
+            result.left = printOrientationCSSValue(left, { containerSize, popupSize });
+            result.right = printOrientationCSSValue(right, { containerSize, popupSize });
+            result.bottom = printOrientationCSSValue(bottom, { containerSize, popupSize });
+            break;
+        default:
+            console.warn('Failed to determin popup position, using default');
+            result.top = printOrientationCSSValue(`${cTop + cHeight}px`);
+            result.left = printOrientationCSSValue(`${cLeft}px`);
+            break;
     }
 
     return result;
@@ -220,11 +249,13 @@ const extractDOMRect = (domRect) => ({
     y: domRect.y,
 });
 
+//Takes out the CUSTOM_POSITION
+const { CUSTOM_POSITION, ...PopupPosition } = _PopupPosition;
+
 export {
     computePopupOrientation,
     handleOrientationResults,
     PopupPosition,
-    PopupType,
     extractDOMRect,
     emptyDOMRect,
 };
