@@ -129,8 +129,8 @@ const Demo = () => (
                 content={<PopupContent>Popup content out of view</PopupContent>}
                 position={PopupPosition.LEFT}
             >
-                {({ showPopup }) => (
-                    <button onClick={showPopup}>Position left but out of view</button>
+                {({ togglePopup }) => (
+                    <button onClick={togglePopup}>Position left but out of view</button>
                 )}
             </Popup>
         </div>

@@ -4,10 +4,13 @@ A simple `react` + `styled-components` popup
 
 ## Package Interface
 
-Named exports: `Popup`, `usePopupContext`, `PopupPosition`, and `PopupContentContainer`  
+Named exports: `Popup`, `usePopupContext`, `PopupPosition`, `PopupContentContainer`, `extractDOMRect`, and `computeCenterPosition`
 Default export: `Popup`
 
 ## Usages
+
+**_Note: The immediate child to Popup should not be React.Fragment_**  
+**_If the immediate child must be a fragment, you need to supply a "parent container" DOM node for the popup to attach to via `parentNode` prop_**
 
 ### 1) Pass in a function as children to access popup methods
 
@@ -89,23 +92,24 @@ const position = PopupPosition.CUSTOM({ top, left, bottom, right });
 
 ## Popup Props
 
-| Prop                        | Type          | Default               | Description                                                                                 |
-| --------------------------- | ------------- | --------------------- | ------------------------------------------------------------------------------------------- |
-| --------------------------- | ------------- | --------------------- | ------------------------------------------------------------------------------------------- |
-| content                     | Component     | undefined             | A component or function that returns a component to serve as the popup content              |
-| onPopupShow                 | func          | undefined             | Function to trigger when the popup is shown                                                 |
-| onPopupClose                | func          | undefined             | Function to trigger when the popup is closed                                                |
-| showOnRender                | boolean       | false                 | If true, popup will display when mounted                                                    |
-| closeOnOffClick             | boolean       | true                  | If true, clicking off the popup will close the popup                                        |
-| persist                     | boolean       | false                 | If true, the popup will be mounted in DOM and hidden / shown via CSS                        |
-| position                    | PopupPosition | PopupPosition.BOTTOM  | Defines the position of the popup                                                           |
-| popupStyle                  | object        | undefined             | Styles for popup                                                                            |
-| zIndex                      | number        | 3                     | Z-index for popup                                                                           |
-| forcePosition               | boolean       | false                 | If true, turns off checking for in view port rendering                                      |
-| animationDuration           | number        | 500                   | Animation duration in ms                                                                    |
-| bufferX                     | number        | 25                    | The amount of pixel added as buffer when calculating the x-direction in view port constrain |
-| bufferY                     | number        | 25                    | The amount of pixel added as buffer when calculating the y-direction in view port constrain |
-| CustomPopupContentContainer | Component     | PopupContentContainer | Defines the popup component                                                                 |
+| Prop                        | Type          | Default                       | Description                                                                                                                                                                                                                         |
+| --------------------------- | ------------- | ----------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| --------------------------- | ------------- | ---------------------         | -------------------------------------------------------------------------------------------                                                                                                                                         |
+| content                     | Component     | undefined                     | A component or function that returns a component to serve as the popup content                                                                                                                                                      |
+| onPopupShow                 | func          | undefined                     | Function to trigger when the popup is shown                                                                                                                                                                                         |
+| onPopupClose                | func          | undefined                     | Function to trigger when the popup is closed                                                                                                                                                                                        |
+| showOnRender                | boolean       | false                         | If true, popup will display when mounted                                                                                                                                                                                            |
+| closeOnOffClick             | boolean       | true                          | If true, clicking off the popup will close the popup                                                                                                                                                                                |
+| persist                     | boolean       | false                         | If true, the popup will be mounted in DOM and hidden / shown via CSS                                                                                                                                                                |
+| position                    | PopupPosition | PopupPosition.BOTTOM          | Defines the position of the popup                                                                                                                                                                                                   |
+| popupStyle                  | object        | undefined                     | Styles for popup                                                                                                                                                                                                                    |
+| parentNode                  | DOM Node      | immediate Popup wrapped child | An optional DOM node to serve as the popup parent container, if undefined, the immediate child wrapped with Popup will serve as the parent container. You MUST define this prop if the immediate child of Popup is a React Fragment |
+| zIndex                      | number        | 3                             | Z-index for popup                                                                                                                                                                                                                   |
+| forcePosition               | boolean       | false                         | If true, turns off checking for in view port rendering                                                                                                                                                                              |
+| animationDuration           | number        | 500                           | Animation duration in ms                                                                                                                                                                                                            |
+| bufferX                     | number        | 25                            | The amount of pixel added as buffer when calculating the x-direction in view port constrain                                                                                                                                         |
+| bufferY                     | number        | 25                            | The amount of pixel added as buffer when calculating the y-direction in view port constrain                                                                                                                                         |
+| CustomPopupContentContainer | Component     | PopupContentContainer         | Defines the popup component                                                                                                                                                                                                         |
 
 ## Popup Methods
 
@@ -117,6 +121,27 @@ Below are the methods available to control the popup
 | closePopup        | none                        | Closes the popup                  |
 | togglePopup       | none                        | Toggles the state of the popup    |
 | setDynamicContent | Component \| Func Component | Updates the contents of the popup |
-| updateOptions     | { ...WIP }                  | Updates the specified option      |
 
-## Additional Notes
+## Helper Functions
+
+The below functions may be useful when trying to define custom popup positions:
+
+-   **extractDOMRect**: Takes the result of `node.getBoundingClientRect` as input and outputs a corresponding js object
+-   **computeCenterPosition**: `function(popupSize: extractDOMRect, parentSize: extractDOMRect) => { x: number, y: number }`. This function takes the two node sizes, and returns the x, y coordinates such that the 1st node are centered with respect to the 2nd node in the x and/or y direction
+
+```javascript
+//anchorNode is somewhere else on the page, not referring to the immediate child that Popup wrapped around
+const anchorNodeSize = extractDOMRect(someNode.getBoundingClientRect());
+const customPositionFn = ({ popupSize }) => {
+    const { x } = computeCenterPosition(popupSize, anchorNodeSize);
+    //Horizontally centers popup with respect to anchor element
+    return `${x}px`;
+};
+<Popup
+    position={PopupPosition.CUSTOM({
+        left: customPositionFn,
+    })}
+>
+    ...
+</Popup>;
+```

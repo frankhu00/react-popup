@@ -20,6 +20,7 @@ export const Popup = ({
     closeOnOffClick = true,
     position = PopupPosition.BOTTOM,
     popupStyle,
+    parentNode,
     CustomPopupContentContainer = PopupContentContainer,
     zIndex = 3,
     persist = false,
@@ -44,7 +45,11 @@ export const Popup = ({
         if (show) {
             const popupSize = extractDOMRect(popupNode.current.getBoundingClientRect());
             const containerSize =
-                node && node.current && typeof node.current.getBoundingClientRect === 'function'
+                parentNode && typeof parentNode.getBoundingClientRect === 'function'
+                    ? extractDOMRect(parentNode.getBoundingClientRect())
+                    : node &&
+                      node.current &&
+                      typeof node.current.getBoundingClientRect === 'function'
                     ? extractDOMRect(node.current.getBoundingClientRect())
                     : emptyDOMRect;
             document.addEventListener('mousedown', handleClickOutside);
@@ -69,7 +74,6 @@ export const Popup = ({
                     console.warn(
                         `Could not determine popup container size. Failed to auto-adjust popup to render in view port`
                     );
-                    console.warn('Popup.js containerSize', emptyDOMRect);
                 }
                 setPositionStyle(handleOrientationResults(position, { containerSize, popupSize }));
             }
@@ -90,18 +94,27 @@ export const Popup = ({
         }
     }, [showOnRender]);
 
+    /*
+    "Inside" is defined as the popup and the container element (parentNode doesn't count)
+     */
     const handleClickOutside = (e) => {
-        if (popupNode.current) {
-            if (closeOnOffClick && !popupNode.current.contains(e.target)) {
+        if ((popupNode.current || node.current || parentNode) && closeOnOffClick) {
+            if (
+                !(
+                    popupNode.current.contains(e.target) ||
+                    node.current.contains(e.target) ||
+                    parentNode?.contains(e.target)
+                )
+            ) {
                 setShow(false);
             }
-        } else {
-            setShow(false);
         }
     };
 
     const setPopupState = (state) => {
-        setShow(state);
+        if (state !== show) {
+            setShow(state);
+        }
     };
 
     const closePopup = setPopupState.bind(this, false);

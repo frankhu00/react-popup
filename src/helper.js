@@ -17,31 +17,19 @@ const _PopupPosition = {
 
 //TODO : Not sure how this will play with initial position setting with center on
 //Since at initial state, the popupSize may be undefined
-const computeCenterPosition = (popupSize, parentSize) => {
-    const computation = (popupSize, parentSize) => (name) => {
-        const popupDimension = popupSize[name];
-        const parentDimension = parentSize[name];
-        const popupMid = popupDimension / 2;
-        const parentMid = parentDimension / 2;
-        const percentage = (parentMid - popupMid) / parentDimension;
-        return percentage;
-    };
-    const getCenter = computation(popupSize, parentSize);
-    return { x: getCenter('width'), y: getCenter('height') };
+const computation = (popupSize, parentSize) => (name) => {
+    const coor = name == 'width' ? 'left' : 'top';
+    const popupDimension = popupSize[name];
+    const popupMid = popupDimension / 2;
+
+    const parentDimension = parentSize[name];
+    const parentCoord = parentSize[coor];
+    const parentMid = parentDimension / 2;
+
+    return parentMid + parentCoord - popupMid;
 };
 
-const computeFixedCenterPosition = (popupSize, parentSize) => {
-    const computation = (popupSize, parentSize) => (name) => {
-        const coor = name == 'width' ? 'left' : 'top';
-        const popupDimension = popupSize[name];
-        const popupMid = popupDimension / 2;
-
-        const parentDimension = parentSize[name];
-        const parentCoord = parentSize[coor];
-        const parentMid = parentDimension / 2;
-
-        return parentMid + parentCoord - popupMid;
-    };
+const computeCenterPosition = (popupSize, parentSize) => {
     const getCenter = computation(popupSize, parentSize);
     return { x: getCenter('width'), y: getCenter('height') };
 };
@@ -156,7 +144,7 @@ const printOrientationCSSValue = (value, { containerSize, popupSize } = {}) => {
 
 const handleOrientationResults = (orientation, { containerSize, popupSize } = {}) => {
     const { name, top, bottom, left, right } = orientation;
-    const { x: xCenter, y: yCenter } = computeFixedCenterPosition(popupSize, containerSize);
+    const { x: xCenter, y: yCenter } = computeCenterPosition(popupSize, containerSize);
     const result = {};
 
     const { top: cTop, width: cWidth, height: cHeight, left: cLeft } = containerSize;
@@ -258,4 +246,5 @@ export {
     PopupPosition,
     extractDOMRect,
     emptyDOMRect,
+    computeCenterPosition,
 };
