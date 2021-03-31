@@ -103,7 +103,7 @@ export const Popup = ({
                 !(
                     popupNode.current.contains(e.target) ||
                     node.current.contains(e.target) ||
-                    parentNode?.contains(e.target)
+                    (parentNode && parentNode.contains(e.target))
                 )
             ) {
                 setShow(false);
