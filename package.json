@@ -1,6 +1,6 @@
 {
     "name": "@frankhu00/react-popup",
-    "version": "1.5.1",
+    "version": "1.5.3",
     "description": "React popup",
     "main": "dist/umd/index.js",
     "module": "dist/esm/index.js",
