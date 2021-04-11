@@ -166,7 +166,10 @@ export const Popup = ({
                 >
                     {typeof prioritizePopupContent() === 'function'
                         ? prioritizePopupContent()({ ...propsToPassDown, ...props })
-                        : prioritizePopupContent()}
+                        : React.cloneElement(prioritizePopupContent(), {
+                              ...propsToPassDown,
+                              ...props,
+                          })}
                 </CustomPopupContentContainer>
             ) : null}
         </>
