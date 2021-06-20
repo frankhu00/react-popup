@@ -182,12 +182,12 @@ const computePopupOrientation = (
         if (conflicts.length > 0) {
             //Try to opposite-ify the conflicts and create the new name there
             const resolvedConflictArr = conflicts.map((c) => conflictResolver(c));
-            let resolvedNamed = resolvedConflictArr.join('_');
+            let resolvedName = resolvedConflictArr.join('_');
             //Check if its LEFT_ALIGN|RIGHT_ALIGN|CENTER resolved conflicts, since those have TOP_ or BOTTOM_ attached and needs to replace properly
             if (resolvedConflictArr.length === 1) {
                 const matched = resolvedConflictArr[0].match(/^(LEFT_ALIGN|RIGHT_ALIGN|CENTER)$/i);
                 if (matched && matched[1]) {
-                    resolvedNamed = orientation.name.replace(conflicts[0], matched[1]);
+                    resolvedName = orientation.name.replace(conflicts[0], matched[1]);
                 }
             }
 
