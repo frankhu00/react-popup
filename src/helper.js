@@ -153,12 +153,14 @@ const computePopupOrientation = (
     const alignLength = Math.abs(popupX - parentSize.width);
     if (preferredOrientation.name.indexOf('_LEFT_ALIGN') > -1) {
         conflicts = conflicts.filter((c) => c !== 'LEFT'); //remove the left conflict check result
-        if (availableSpace.left < alignLength) {
+        if (availableSpace.right < alignLength) {
+            //left align means you check the right side
             conflicts.push('LEFT_ALIGN');
         }
     } else if (preferredOrientation.name.indexOf('_RIGHT_ALIGN') > -1) {
         conflicts = conflicts.filter((c) => c !== 'RIGHT'); //remove the right conflict check result
-        if (availableSpace.right < alignLength) {
+        if (availableSpace.left < alignLength) {
+            //right align means you check the left side
             conflicts.push('RIGHT_ALIGN');
         }
     }
@@ -179,7 +181,15 @@ const computePopupOrientation = (
         //Some conflicts found
         if (conflicts.length > 0) {
             //Try to opposite-ify the conflicts and create the new name there
-            const resolvedName = conflicts.map((c) => conflictResolver(c)).join('_');
+            const resolvedConflictArr = conflicts.map((c) => conflictResolver(c));
+            let resolvedNamed = resolvedConflictArr.join('_');
+            //Check if its LEFT_ALIGN|RIGHT_ALIGN|CENTER resolved conflicts, since those have TOP_ or BOTTOM_ attached and needs to replace properly
+            if (resolvedConflictArr.length === 1) {
+                const matched = resolvedConflictArr[0].match(/^(LEFT_ALIGN|RIGHT_ALIGN|CENTER)$/i);
+                if (matched && matched[1]) {
+                    resolvedNamed = orientation.name.replace(conflicts[0], matched[1]);
+                }
+            }
 
             //Check if the resolved name matches any setting
             if (autoOrientationNameChecker(resolvedName)) {
