@@ -102,19 +102,19 @@ const Demo = () => (
             </Popup>
 
             <Popup
-                content={<PopupContent>Position top left aligned</PopupContent>}
+                content={<PopupContent>Top left aligned</PopupContent>}
                 position={PopupPosition.TOP_LEFT_ALIGN}
             >
                 {({ showPopup }) => <Button onClick={showPopup}>Position top left aligned</Button>}
             </Popup>
             <Popup
-                content={<PopupContent>Position top right aligned</PopupContent>}
+                content={<PopupContent>Top right aligned</PopupContent>}
                 position={PopupPosition.TOP_RIGHT_ALIGN}
             >
                 {({ showPopup }) => <Button onClick={showPopup}>Position top right aligned</Button>}
             </Popup>
             <Popup
-                content={<PopupContent>Position bottom left aligned</PopupContent>}
+                content={<PopupContent>Bottom left aligned</PopupContent>}
                 position={PopupPosition.BOTTOM_LEFT_ALIGN}
             >
                 {({ showPopup }) => (
@@ -122,7 +122,7 @@ const Demo = () => (
                 )}
             </Popup>
             <Popup
-                content={<PopupContent>Position bottom right aligned</PopupContent>}
+                content={<PopupContent>Bottom right aligned</PopupContent>}
                 position={PopupPosition.BOTTOM_RIGHT_ALIGN}
             >
                 {({ showPopup }) => (
