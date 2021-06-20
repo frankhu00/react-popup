@@ -100,6 +100,35 @@ const Demo = () => (
             >
                 {({ showPopup }) => <Button onClick={showPopup}>Position right-center</Button>}
             </Popup>
+
+            <Popup
+                content={<PopupContent>Position top left aligned</PopupContent>}
+                position={PopupPosition.TOP_LEFT_ALIGN}
+            >
+                {({ showPopup }) => <Button onClick={showPopup}>Position top left aligned</Button>}
+            </Popup>
+            <Popup
+                content={<PopupContent>Position top right aligned</PopupContent>}
+                position={PopupPosition.TOP_RIGHT_ALIGN}
+            >
+                {({ showPopup }) => <Button onClick={showPopup}>Position top right aligned</Button>}
+            </Popup>
+            <Popup
+                content={<PopupContent>Position bottom left aligned</PopupContent>}
+                position={PopupPosition.BOTTOM_LEFT_ALIGN}
+            >
+                {({ showPopup }) => (
+                    <Button onClick={showPopup}>Position bottom left aligned</Button>
+                )}
+            </Popup>
+            <Popup
+                content={<PopupContent>Position bottom right aligned</PopupContent>}
+                position={PopupPosition.BOTTOM_RIGHT_ALIGN}
+            >
+                {({ showPopup }) => (
+                    <Button onClick={showPopup}>Position bottom right aligned</Button>
+                )}
+            </Popup>
         </Grid>
         <h2>Custom Position</h2>
         <div style={{ width: '100%', display: 'flex', justifyContent: 'center' }}>
