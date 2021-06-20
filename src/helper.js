@@ -186,6 +186,11 @@ const computePopupOrientation = (
                 console.warn(`Popup detected a in-view boundary conflict when placing the popup and auto-resolved to use "PopupPosition.${resolvedName}"
                 Please use set "forcePosition" to true to disable this feature.`);
                 orientation = _PopupPosition[resolvedName];
+            } else {
+                console.warn(
+                    'Popup detected a in-view boundary conflict when placing the popup and failed to auto-resolve. Using popup position defined as is'
+                );
+                console.warn(`Failed position name: "PopupPosition.${resolvedName}"`);
             }
         }
         //Just return otherwise
