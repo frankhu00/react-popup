@@ -124,6 +124,7 @@ const Demo = () => (
             <Popup
                 content={<PopupContent>Bottom right aligned</PopupContent>}
                 position={PopupPosition.BOTTOM_RIGHT_ALIGN}
+                closeOnScroll={false}
             >
                 {({ showPopup }) => (
                     <Button onClick={showPopup}>Position bottom right aligned</Button>

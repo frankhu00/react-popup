@@ -28,6 +28,7 @@ export const Popup = ({
     bufferX = 25, //buffer when trying to calculate if popup will fit in the specified position
     bufferY = 25,
     animationDuration = 500,
+    closeOnScroll = true,
     ...props
 }) => {
     const node = useRef();
@@ -53,6 +54,9 @@ export const Popup = ({
                     ? extractDOMRect(node.current.getBoundingClientRect())
                     : emptyDOMRect;
             document.addEventListener('mousedown', handleClickOutside);
+            if (closeOnScroll) {
+                document.addEventListener('scroll', closePopup);
+            }
             if (typeof onPopupShow === 'function') {
                 onPopupShow();
             }
@@ -85,6 +89,9 @@ export const Popup = ({
 
         return () => {
             document.removeEventListener('mousedown', handleClickOutside);
+            if (closeOnScroll) {
+                document.removeEventListener('scroll', closePopup);
+            }
         };
     }, [show]);
 
