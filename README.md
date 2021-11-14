@@ -36,6 +36,8 @@ const SampleButton = React.forwardRef((props, ref) => (
 </Popup>;
 ```
 
+Note: This method may cause `Unknown Prop Warning` from react
+
 ### 3) Using ContextAPI to access popup methods
 
 ```javascript

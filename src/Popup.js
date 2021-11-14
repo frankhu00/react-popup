@@ -147,15 +147,13 @@ export const Popup = ({
         <>
             <PopupContext.Provider value={propsToPassDown}>
                 {typeof children === 'function'
-                    ? React.cloneElement(
-                          children({
-                              ...propsToPassDown,
-                              ...props,
-                          }),
-                          {
+                    ? ((props) =>
+                          React.cloneElement(children(props), {
                               ref: (ele) => (node.current = ele),
-                          }
-                      )
+                          }))({
+                          ...propsToPassDown,
+                          ...props,
+                      })
                     : React.cloneElement(children, {
                           ...propsToPassDown,
                           ...props,
